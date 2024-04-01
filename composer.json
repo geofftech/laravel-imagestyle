@@ -1,0 +1,19 @@
+{
+  "name": "geofftech/laravel-imagestyle",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "GeoffTech\\LaravelImageStyle\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Geoff",
+      "email": "geoff@geofftech.com"
+    }
+  ],
+  "require": {
+    "php": "^8.2"
+  }
+}
