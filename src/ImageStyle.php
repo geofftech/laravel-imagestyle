@@ -8,24 +8,25 @@ use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Interfaces\ImageInterface;
+use Illuminate\Support\Facades\Log;
 
 class ImageStyle
 {
-  public static function thumbnail(string|null $oldValue, int $scale = 200)
+  public static function thumbnail(string|null $path, int $scale = 200)
   {
-    return self::cover($oldValue, $scale);
+    return self::cover($path, $scale);
   }
 
-  public static function banner(string|null $oldValue)
+  public static function banner(string|null $path)
   {
-    return self::scale($oldValue, 1000, 500);
+    return self::scale($path, 1000, 500);
   }
 
-  public static function height(string|null $oldValue, int $height = 200)
+  public static function height(string|null $path, int $height = 200)
   {
-    // return self::scale($oldValue, null, $height);
+    // return self::scale($path, null, $height);
     return self::process(
-      $oldValue,
+      $path,
       '-scale-' . '-' . $height,
       function (ImageInterface $image) use ($height) {
         $image->scale(height: $height);
@@ -33,10 +34,10 @@ class ImageStyle
     );
   }
 
-  public static function scale(string|null $oldValue, ?int $width = 800, ?int $height = 800)
+  public static function scale(string|null $path, ?int $width = 800, ?int $height = 800)
   {
     return self::process(
-      $oldValue,
+      $path,
       '-scale-' . $width . '-' . $height,
       function (ImageInterface $image) use ($width, $height) {
         $image->scale($width, $height);
@@ -44,10 +45,10 @@ class ImageStyle
     );
   }
 
-  public static function cover(string|null $oldValue, int $scale = 800)
+  public static function cover(string|null $path, int $scale = 800)
   {
     return self::process(
-      $oldValue,
+      $path,
       '-cover-' . $scale,
       function (ImageInterface $image) use ($scale) {
         $image->cover($scale, $scale);
@@ -55,32 +56,45 @@ class ImageStyle
     );
   }
 
-  public static function process(string|null $oldValue, string $tag, Closure $process)
+  public static function process(string|null $path, string $tag, Closure $process)
   {
 
-    if (is_null($oldValue)) {
+    if (is_null($path)) {
       return null;
     }
 
-    if (str_starts_with($oldValue, 'https://') || str_starts_with($oldValue, 'http://')) {
-      return $oldValue;
+    if (str_starts_with($path, 'https://') || str_starts_with($path, 'http://')) {
+      return $path;
     }
 
-    $ext = pathinfo($oldValue, PATHINFO_EXTENSION);
-    $token = md5($oldValue . $tag);
+    $ext = pathinfo($path, PATHINFO_EXTENSION);
+    $token = md5($path . $tag);
     $newValue = 'image_style/' . $token . '.' . $ext;
 
     if (!Storage::disk('public')->exists($newValue)) {
-      $oldPath = Storage::disk('public')->get($oldValue);
+      Log::info('image-style', ['path' => $path, 'tag' => $tag]);
+
+      $oldPath = Storage::disk('public')->get($path);
       $newPath = Storage::disk('public')->path($newValue);
 
       $manager = new ImageManager(Driver::class);
       $image = $manager->read($oldPath);
-      $process($image);
-      $image->save($newPath);
+
+      try {
+
+        $process($image);
+        $image->save($newPath);
+
+      } catch (\Throwable $th) {
+
+        Log::error('image-style', ['path' => $path, 'tag' => $tag, 'error' => $th->getMessage()]);
+        return null;
+
+      }
     }
 
     return asset(Storage::disk('public')->url($newValue));
+
   }
 
 }
