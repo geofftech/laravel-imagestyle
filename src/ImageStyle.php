@@ -72,18 +72,18 @@ class ImageStyle
     $newValue = 'image_style/' . $token . '.' . $ext;
 
     if (!Storage::disk('public')->exists($newValue)) {
-      Log::info('image-style', ['path' => $path, 'tag' => $tag]);
-
-      $oldPath = Storage::disk('public')->get($path);
-      $newPath = Storage::disk('public')->path($newValue);
-
-      $manager = new ImageManager(Driver::class);
-      $image = $manager->read($oldPath);
-
       try {
+
+        $oldPath = Storage::disk('public')->get($path);
+        $newPath = Storage::disk('public')->path($newValue);
+
+        $manager = new ImageManager(Driver::class);
+        $image = $manager->read($oldPath);
 
         $process($image);
         $image->save($newPath);
+
+        Log::info('image-style', ['path' => $path, 'tag' => $tag]);
 
       } catch (\Throwable $th) {
 
