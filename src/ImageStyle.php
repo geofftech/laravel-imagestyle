@@ -12,89 +12,126 @@ use Illuminate\Support\Facades\Log;
 
 class ImageStyle
 {
-  public static function thumbnail(string|null $path, int $scale = 200)
+
+  public string $path = "";
+
+  public string $disk = "public";
+
+  public string $process = "scale"; // cover|scale
+
+  public int|null $height = null;
+
+  public int|null $width = null;
+
+  public function __construct(string $path)
   {
-    return self::cover($path, $scale);
+    $this->path = $path;
   }
 
-  public static function banner(string|null $path)
+  public function setPath(string $path)
   {
-    return self::scale($path, 1000, 500);
+    $this->path = $path;
+    return $this;
   }
 
-  public static function height(string|null $path, int $height = 200)
+  public function setDisk(string $disk)
   {
-    // return self::scale($path, null, $height);
-    return self::process(
-      $path,
-      '-scale-' . '-' . $height,
-      function (ImageInterface $image) use ($height) {
-        $image->scale(height: $height);
-      }
-    );
+    $this->disk = $disk;
+    return $this;
   }
 
-  public static function scale(string|null $path, ?int $width = 800, ?int $height = 800)
+  public function setProcess(string $process)
   {
-    return self::process(
-      $path,
-      '-scale-' . $width . '-' . $height,
-      function (ImageInterface $image) use ($width, $height) {
-        $image->scale($width, $height);
-      }
-    );
+    $this->process = $process;
+    return $this;
   }
 
-  public static function cover(string|null $path, int $scale = 800)
+  public function setHeight(int|null $height)
   {
-    return self::process(
-      $path,
-      '-cover-' . $scale,
-      function (ImageInterface $image) use ($scale) {
-        $image->cover($scale, $scale);
-      }
-    );
+    $this->height = $height;
+    return $this;
   }
 
-  public static function process(string|null $path, string $tag, Closure $process)
+  public function setWidth(int|null $width)
   {
+    $this->width = $width;
+    return $this;
+  }
 
-    if (is_null($path)) {
+  public function thumbnail(int $scale = 200)
+  {
+    return $this->setProcess('cover')
+      ->setWidth($scale)
+      ->setHeight($scale);
+  }
+
+  public function banner(int $width = 500, int $height = 1000)
+  {
+    return $this->setProcess('scale')
+      ->setWidth($width)
+      ->setHeight($height);
+  }
+
+  public function getKey()
+  {
+    return md5($this->path . '-' . $this->process . '-' . $this->height . '-' . $this->width);
+  }
+
+  public function getCachePath()
+  {
+    $ext = pathinfo($this->path, PATHINFO_EXTENSION);
+    $key = $this->getKey();
+    $path = 'image_style/' . $key . '.' . $ext;
+    return $path;
+  }
+
+  public function get(): string|null
+  {
+    if (blank($this->path)) {
       return null;
     }
 
-    if (str_starts_with($path, 'https://') || str_starts_with($path, 'http://')) {
-      return $path;
+    if (str_starts_with($this->path, 'https://') || str_starts_with($this->path, 'http://')) {
+      return $this->path;
     }
 
-    $ext = pathinfo($path, PATHINFO_EXTENSION);
-    $token = md5($path . $tag);
-    $newValue = 'image_style/' . $token . '.' . $ext;
+    $path = $this->getCachePath();
 
-    if (!Storage::disk('public')->exists($newValue)) {
+    if (!Storage::disk('public')->exists($path)) {
       try {
 
-        $oldPath = Storage::disk('public')->get($path);
-        $newPath = Storage::disk('public')->path($newValue);
+        $oldPath = Storage::disk($this->disk)->get($this->path);
+        $newPath = Storage::disk($this->disk)->path($path);
 
         $manager = new ImageManager(Driver::class);
         $image = $manager->read($oldPath);
 
-        $process($image);
+        match ($this->process) {
+          'cover' => $image->cover($this->width, $this->height),
+          'scale' => $image->scale($this->width, $this->height),
+        };
+
         $image->save($newPath);
 
-        Log::info('image-style', ['path' => $path, 'tag' => $tag]);
+        Log::info('imageStyle', [
+          'path' => $this->path,
+          'cache' => $path,
+        ]);
 
       } catch (\Throwable $th) {
 
-        Log::error('image-style', ['path' => $path, 'tag' => $tag, 'error' => $th->getMessage()]);
+        Log::error('imageStyle', [
+          'path' => $this->path,
+          'cache' => $path,
+          'error' => $th->getMessage(),
+        ]);
+
         return null;
 
       }
     }
 
-    return asset(Storage::disk('public')->url($newValue));
-
+    return asset(Storage::disk('public')->url($path));
   }
 
 }

@@ -5,7 +5,10 @@
   "autoload": {
     "psr-4": {
       "GeoffTech\\LaravelImageStyle\\": "src/"
-    }
+    },
+    "files": [
+      "src/helpers.php"
+    ]
   },
   "authors": [
     {
