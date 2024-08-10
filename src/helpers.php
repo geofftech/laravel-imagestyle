@@ -2,7 +2,9 @@
 
 use GeoffTech\LaravelImageStyle\ImageStyle;
 
-function imagestyle(string $path)
-{
-    return new ImageStyle($path);
+if (!function_exists('img')) {
+    function img(?string $name)
+    {
+        return ImageStyle::make($name);
+    }
 }
