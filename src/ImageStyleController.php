@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace GeoffTech\LaravelImageStyle;
 
+use App\Http\Controllers\Controller;
 use GeoffTech\LaravelImageStyle\ImageStyle;
 use Illuminate\Http\Request;
 
