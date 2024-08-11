@@ -22,7 +22,7 @@ class ImageStyle
 
     public ?int $width = null;
 
-    public string $placeholder = '/images/placeholder.png';
+    public ?string $placeholder = '/images/placeholder.png';
 
     public $image;
 
@@ -86,17 +86,38 @@ class ImageStyle
         return $this;
     }
 
-    public function cover()
+    public function cover(?int $width = null, ?int $height = null)
     {
+        if ($width) {
+            $this->width($width);
+        }
+        if ($height) {
+            $this->height($height);
+        }
+
         return $this->mode('cover');
     }
 
-    public function scale()
+    public function scale(?int $width = null, ?int $height = null)
     {
+        if ($width) {
+            $this->width($width);
+        }
+        if ($height) {
+            $this->width($height);
+        }
+
         return $this->mode('scale');
     }
 
-    public function thumbnail(int $size = 100)
+    public function placeholder(?string $placeholder = null)
+    {
+        $this->placeholder = $placeholder;
+
+        return $this;
+    }
+
+    public function thumbnail(int $size = 200)
     {
         return $this->cover()
             ->width($size)
@@ -112,9 +133,9 @@ class ImageStyle
 
     public function getOptions(): string
     {
-        return 'm'.$this->mode
-            .'+h'.$this->height
-            .'+w'.$this->width;
+        return 'm' . $this->mode
+            . '+h' . $this->height
+            . '+w' . $this->width;
     }
 
     public function parseOptions(string $option_str)
@@ -140,7 +161,7 @@ class ImageStyle
     {
         $ext = pathinfo($this->path, PATHINFO_EXTENSION);
 
-        return $this->cache_folder.'/'.$this->path.'/'.$this->getOptions().'.'.$ext;
+        return $this->cache_folder . '/' . $this->path . '/' . $this->getOptions() . '.' . $ext;
     }
 
     public function __toString()
@@ -173,10 +194,26 @@ class ImageStyle
 
     private function processImage()
     {
-        match ($this->mode) {
-            'cover' => $this->image->cover($this->width, $this->height),
-            'scale' => $this->image->scale($this->width, $this->height),
-        };
+        // match ($this->mode) {
+        //     'cover' => $this->image->cover($this->width, $this->height),
+        //     'scale' => $this->image->scale($this->width, $this->height),
+        // };
+
+        // cover
+        if ($this->mode === 'cover') {
+            $this->image->cover($this->width, $this->height);
+        }
+
+        // scale
+        elseif ($this->height && $this->width) {
+            $this->image->scale($this->width, $this->height);
+        } elseif (!$this->height && !$this->width) {
+            // do nothing
+        } elseif ($this->height && !$this->width) {
+            $this->image->scale(height: $this->height);
+        } elseif (!$this->height && $this->width) {
+            $this->image->scale(width: $this->width);
+        }
 
         return $this;
     }
