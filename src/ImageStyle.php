@@ -12,11 +12,17 @@ class ImageStyle
 
     public string $disk = 'public';
 
+    public string $cache_disk = 'cache';
+
+    public string $cache_folder = 'images';
+
     public string $mode = 'scale'; // cover|scale
 
     public ?int $height = null;
 
     public ?int $width = null;
+
+    public string $placeholder = '/images/placeholder.png';
 
     public $image;
 
@@ -134,26 +140,26 @@ class ImageStyle
     {
         $ext = pathinfo($this->path, PATHINFO_EXTENSION);
 
-        return 'image_style/'.$this->path.'/'.$this->getOptions().'.'.$ext;
+        return $this->cache_folder.'/'.$this->path.'/'.$this->getOptions().'.'.$ext;
     }
 
     public function __toString()
     {
         if (!$this->path) {
-            return asset('/images/placeholder.png');
+            return asset($this->placeholder);
         }
 
         if (str_starts_with($this->path, 'https://') || str_starts_with($this->path, 'http://')) {
             return $this->path;
         }
 
-        if (!Storage::disk('public')->exists($this->path)) {
-            return asset('/images/placeholder.png');
+        if (!Storage::disk($this->disk)->exists($this->path)) {
+            return asset($this->placeholder);
         }
 
         $target = $this->getTarget();
 
-        $url = Storage::disk($this->disk)->url($target);
+        $url = Storage::disk($this->cache_disk)->url($target);
 
         return $url;
     }
@@ -162,7 +168,7 @@ class ImageStyle
     {
         $target = $this->getTarget();
 
-        return Storage::disk($this->disk)->path($target);
+        return Storage::disk($this->cache_disk)->path($target);
     }
 
     private function processImage()
@@ -179,9 +185,9 @@ class ImageStyle
     {
         $directory = dirname($target);
 
-        Storage::disk($this->disk)->makeDirectory($directory);
+        Storage::disk($this->cache_disk)->makeDirectory($directory);
 
-        $this->image->save(Storage::disk($this->disk)->path($target));
+        $this->image->save(Storage::disk($this->cache_disk)->path($target));
 
         return $this;
     }
