@@ -75,3 +75,11 @@ Route::get('/cache/images/{everything}', ImageStyleController::class)->where(['e
 ### Not found image
 
 - create or copy image to `/public/images/placeholder.png`
+
+### Git Ignore
+
+- add to `.gitignore`
+
+```
+/public/cache
+```
