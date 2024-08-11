@@ -124,7 +124,7 @@ class ImageStyle
             ->height($size);
     }
 
-    public function banner(int $width = 500, int $height = 1000)
+    public function banner(int $width = 1200, int $height = 400)
     {
         return $this->scale()
             ->width($width)
