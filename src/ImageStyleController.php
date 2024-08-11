@@ -21,6 +21,6 @@ class ImageStyleController extends Controller
             ->parseOptions($options)
             ->generate();
 
-        return response()->download($img->getFullPath());
+        return response()->file($img->getFullPath());
     }
 }
