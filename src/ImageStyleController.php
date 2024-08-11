@@ -5,9 +5,6 @@ namespace GeoffTech\LaravelImageStyle;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-/**
- * Route::get('/storage/image_style/{everything}', ImageStyleController::class)->where(['everything' => '.*']);
- */
 class ImageStyleController extends Controller
 {
     public function __invoke(Request $request)
