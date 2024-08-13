@@ -166,8 +166,13 @@ class ImageStyle
 
     public function __toString()
     {
+        return $this->url() ?? '';
+    }
+
+    public function url(): string|null
+    {
         if (!$this->path) {
-            return asset($this->placeholder);
+            return !$this->placeholder ? null : asset($this->placeholder);
         }
 
         if (str_starts_with($this->path, 'https://') || str_starts_with($this->path, 'http://')) {
@@ -175,7 +180,7 @@ class ImageStyle
         }
 
         if (!Storage::disk($this->disk)->exists($this->path)) {
-            return asset($this->placeholder);
+            return !$this->placeholder ? null : asset($this->placeholder);
         }
 
         $target = $this->getTarget();
