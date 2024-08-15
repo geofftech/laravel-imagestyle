@@ -12,9 +12,9 @@ class ImageStyle
 
     public string $disk = 'public';
 
-    public string $cache_disk = 'cache';
+    public string $cache_disk;
 
-    public string $cache_folder = 'images';
+    public string $cache_folder;
 
     public string $mode = 'scale'; // cover|scale
 
@@ -22,9 +22,16 @@ class ImageStyle
 
     public ?int $width = null;
 
-    public ?string $placeholder = '/images/placeholder.png';
+    public ?string $placeholder;
 
     public $image;
+
+    public function __construct()
+    {
+        $this->cache_disk = config('imagestyle.disk');
+        $this->cache_folder = config('imagestyle.folder');
+        $this->placeholder = config('imagestyle.placeholder');
+    }
 
     public static function make(?string $path)
     {

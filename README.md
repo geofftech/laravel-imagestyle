@@ -23,7 +23,7 @@
 
 ## Setup
 
-### Cache Disk
+### 1. Setup Cache Disk
 
 - create and link a new local disk
 - edit `/config/filesystem.php`
@@ -44,7 +44,7 @@
     ],
 ```
 
-- add link entry
+### 2. Add a Storage link entry
 
 ```php
     'links' => [
@@ -53,33 +53,10 @@
     ],
 ```
 
-- run storage link
+### 3. Run Storage Link
 
 ```bash
 a storage:link
 ```
 
 - now files in the `/storage/app/cache` folder are accessible from the `/cache` folder in the domain name
-
-### Route
-
-- edit `/routes/web.php`
-- add route
-
-```php
-use GeoffTech\LaravelImageStyle\ImageStyleController;
-
-Route::get('/cache/images/{everything}', ImageStyleController::class)->where(['everything' => '.*']);
-```
-
-### Not found image
-
-- create or copy image to `/public/images/placeholder.png`
-
-### Git Ignore
-
-- add to `.gitignore`
-
-```
-/public/cache
-```
