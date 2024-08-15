@@ -20,5 +20,12 @@ class ServiceProvider extends BaseServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
         // $this->loadViewsFrom(__DIR__ . '/../resources/views', 'imagestyle');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ImageStylePurgeCommand::class,
+                ImageStyleCleanCommand::class,
+            ]);
+        }
     }
 }
