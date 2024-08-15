@@ -169,7 +169,7 @@ class ImageStyle
         return $this->url() ?? '';
     }
 
-    public function url(): string|null
+    public function url(): ?string
     {
         if (!$this->path) {
             return !$this->placeholder ? null : asset($this->placeholder);
