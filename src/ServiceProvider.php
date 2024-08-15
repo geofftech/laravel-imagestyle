@@ -1,5 +1,7 @@
 <?php
 
+namespace GeoffTech\LaravelImageStyle;
+
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
