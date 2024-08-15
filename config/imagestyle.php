@@ -6,6 +6,6 @@ return [
 
     'folder' => env('IMAGESTYLE_FOLDER', 'images'),
 
-    'placeholder' => env('IMAGESTYLE_PLACEHOLDER', 'placeholder'),
+    'placeholder' => env('IMAGESTYLE_PLACEHOLDER', ''),
 
 ];
